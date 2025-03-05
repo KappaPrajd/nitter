@@ -6,7 +6,9 @@ services:
     image: zedeus/nitter:latest
     container_name: nitter
     ports:
-      - "127.0.0.1:8080:8080" # Replace with "8080:8080" if you don't use a reverse proxy
+      - "1235:80" # Replace with "8080:8080" if you don't use a reverse proxy
+    networks:
+      - rss_shared_network
     volumes:
       - ./nitter.conf:/src/nitter.conf:Z,ro
       - ./sessions.jsonl:/src/sessions.jsonl:Z,ro # Run get_sessions.py to get the credentials
@@ -29,6 +31,8 @@ services:
     image: redis:6-alpine
     container_name: nitter-redis
     command: redis-server --save 60 1 --loglevel warning
+    networks:
+      - rss_shared_network
     volumes:
       - nitter-redis:/data
     restart: unless-stopped
@@ -43,6 +47,10 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+
+networks:
+  rss_shared_network:
+    external: true
 
 volumes:
   nitter-redis:
